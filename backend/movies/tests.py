@@ -396,6 +396,8 @@ class Paso7CamposAuditoriaSoloLecturaTests(MovieFactoryMixin, AdminTestCase):
 class Paso9GrupoEditoresTests(MovieFactoryMixin, AdminTestCase):
     @classmethod
     def setUpTestData(cls):
+        # Necesario para que MovieFactoryMixin cree los generos y la persona.
+        super().setUpTestData()
         cls.grupo = Group.objects.create(name="editores")
         cls.permisos = {
             clave: Permission.objects.get(codename=f"{clave}_movie", content_type__app_label="movies")
@@ -503,23 +505,59 @@ class Paso9GrupoEditoresTests(MovieFactoryMixin, AdminTestCase):
 
     def test_comparacion_superusuario_frente_a_editor(self):
         # Es la comprobacion que pide el paso 9 y que ilustra el paso 11.
+        #
+        # Hallazgo: con permisos solo sobre Movie, al editor no solo le
+        # desaparece el boton de eliminar. Tambien desaparece el bloque de
+        # valoraciones del paso 6, porque Django solo pinta un inline si el
+        # usuario puede ver o cambiar el modelo relacionado, y el grupo
+        # "editores" no tiene permisos sobre Rating.
         pelicula = self.crear_pelicula("Alien", 1979, [self.ficcion])
         url_borrar = reverse("admin:movies_movie_delete", args=[pelicula.pk])
         url_cambiar = reverse("admin:movies_movie_change", args=[pelicula.pk])
 
         def ver_panel(usuario):
             self.client.force_login(usuario)
-            return self.texto(self.client.get(url_cambiar))
+            respuesta = self.client.get(url_cambiar)
+            self.assertEqual(respuesta.status_code, 200)
+            return self.texto(respuesta)
 
         texto_super = ver_panel(self.superusuario)
-        ver_panel(self.editor("editor_cmp"))
-        texto_editor = self.texto(self.client.get(url_cambiar))
+        texto_editor = ver_panel(self.editor("editor_cmp"))
 
+        # El superusuario ve el borrado y el inline de valoraciones (paso 6).
         self.assertIn(url_borrar, texto_super)
+        self.assertIn('id="ratings-heading"', texto_super)
+
+        # El editor no ve ninguno de los dos.
         self.assertNotIn(url_borrar, texto_editor)
-        # Ambos ven la pelicula y el formulario de cambio.
-        self.assertIn(url_cambiar, texto_super)
-        self.assertIn(url_cambiar, texto_editor)
+        self.assertNotIn('id="ratings-heading"', texto_editor)
+
+        # Pero si ve la pelicula y puede editarla: el formulario esta ahi.
+        for texto, etiqueta in [(texto_super, "superusuario"), (texto_editor, "editor")]:
+            with self.subTest(usuario=etiqueta):
+                self.assertIn('id="movie_form"', texto)
+                self.assertIn("Alien", texto)
+
+    def test_el_editor_solo_ve_peliculas_en_el_menu_lateral(self):
+        # Sin permisos sobre Genre, Person ni Rating, esas secciones no se listan.
+        self.client.force_login(self.editor("editor_menu"))
+        respuesta = self.client.get(reverse("admin:index"))
+        contenido = self.texto(respuesta)
+        self.assertTexto(respuesta, "Peliculas")
+        for etiqueta in ["Generos", "Personas", "Valoraciones"]:
+            with self.subTest(seccion=etiqueta):
+                self.assertSinTexto(respuesta, etiqueta, "la seccion no deberia verse")
+
+    def test_si_el_grupo_tuviera_permisos_de_rating_recuperaria_el_inline(self):
+        # Confirma que la causa del inline ausente son los permisos, no el inline.
+        self.grupo.permissions.add(
+            Permission.objects.get(codename="view_rating", content_type__app_label="movies"),
+            Permission.objects.get(codename="change_rating", content_type__app_label="movies"),
+        )
+        self.client.force_login(self.editor("editor_inline"))
+        pelicula = self.crear_pelicula("Alien", 1979, [self.ficcion])
+        respuesta = self.client.get(reverse("admin:movies_movie_change", args=[pelicula.pk]))
+        self.assertTexto(respuesta, 'id="ratings-heading"')
 
 
 # ---------------------------------------------------------------------------
@@ -528,6 +566,7 @@ class Paso9GrupoEditoresTests(MovieFactoryMixin, AdminTestCase):
 class Paso10VistaRecomendacionTests(MovieFactoryMixin, AdminTestCase):
     @classmethod
     def setUpTestData(cls):
+        super().setUpTestData()
         # Del mismo genero, claramente mejor y peor valoradas.
         cls.mejor = Movie.objects.create(title="La mejor", year=2020)
         cls.mejor.genres.set([cls.ficcion])
