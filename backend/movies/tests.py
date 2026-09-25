@@ -165,7 +165,7 @@ class Paso5PersonalizacionListadoTests(MovieFactoryMixin, AdminTestCase):
         self.assertTexto(respuesta, "Ciencia ficcion")  # genres_list
         self.assertTexto(respuesta, "8.0")               # average_score
         self.assertTexto(respuesta, "Nº de valores")     # ratings_count
-        for cabecera in ["Title", "Year", "Generos", "Media"]:
+        for cabecera in ["Titulo", "Ano", "Generos", "Media"]:
             with self.subTest(cabecera=cabecera):
                 self.assertTexto(respuesta, cabecera)
 

@@ -22,6 +22,7 @@ class Genre(models.Model):
     name = models.CharField(
         max_length=80,
         unique=True,
+        verbose_name="nombre",
         help_text="Nombre del genero, por ejemplo: Ciencia ficcion.",
     )
 
@@ -40,6 +41,7 @@ class Person(models.Model):
 
     name = models.CharField(
         max_length=120,
+        verbose_name="nombre",
         help_text="Nombre completo de la persona.",
     )
 
@@ -57,20 +59,24 @@ class Movie(models.Model):
 
     title = models.CharField(
         max_length=200,
+        verbose_name="titulo",
         help_text="Titulo original de la pelicula.",
     )
     year = models.PositiveIntegerField(
+        verbose_name="ano",
         validators=[MinValueValidator(1888)],
         help_text="Ano de estreno. 1888 es la primera proyeccion filmica.",
     )
     summary = models.TextField(
         blank=True,
+        verbose_name="sinopsis",
         help_text="Sinopsis breve.",
     )
     cover = models.ImageField(
         upload_to="covers/",
         blank=True,
         null=True,
+        verbose_name="portada",
         help_text="Portada de la pelicula. Requiere Pillow.",
     )
 
@@ -80,6 +86,7 @@ class Movie(models.Model):
         Genre,
         related_name="movies",
         blank=True,
+        verbose_name="generos",
         help_text="Generos de la pelicula.",
     )
 
@@ -89,6 +96,7 @@ class Movie(models.Model):
         Person,
         related_name="movies",
         blank=True,
+        verbose_name="reparto",
         help_text="Reparto y equipo tecnico.",
     )
 
@@ -142,16 +150,19 @@ class Rating(models.Model):
         verbose_name="pelicula",
     )
     score = models.PositiveSmallIntegerField(
+        verbose_name="puntuacion",
         validators=[MinValueValidator(RATING_MIN), MaxValueValidator(RATING_MAX)],
         help_text=f"Puntuacion de {RATING_MIN} a {RATING_MAX}.",
     )
     comment = models.TextField(
         blank=True,
+        verbose_name="comentario",
         help_text="Comentario opcional de quien valora.",
     )
     author = models.CharField(
         max_length=120,
         blank=True,
+        verbose_name="autor",
         help_text="Nombre de quien emite la valoracion.",
     )
 
