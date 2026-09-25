@@ -56,6 +56,11 @@ class MovieAdmin(admin.ModelAdmin):
     # Paso 6: las valoraciones se editan dentro de la pelicula.
     inlines = [RatingInline]
 
+    # Paso 7: la auditoria se muestra, pero no se puede escribir a mano.
+    # Los campos auto_now_add / auto_now ya los fija Django; marcar aqui solo
+    # evita que el panel parezca un formulario editable que no lo es.
+    readonly_fields = ("created_at", "updated_at")
+
     @admin.display(description="generos", ordering="genres__name")
     def genres_list(self, obj: Movie) -> str:
         """Muestra todos los generos de la pelicula separados por comas."""
@@ -110,3 +115,4 @@ class RatingAdmin(admin.ModelAdmin):
     search_fields = ("movie__title", "author", "comment")
     autocomplete_fields = ("movie",)
     ordering = ("-created_at",)
+    readonly_fields = ("created_at", "updated_at")
