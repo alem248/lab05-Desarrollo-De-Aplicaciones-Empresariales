@@ -1,0 +1,11 @@
+# Dependencias del backend (Django) - Lab 06
+# Generado con Python 3.13.5 / pip 25.1.1
+# Instalación:  pip install -r requirements.txt
+
+# --- Núcleo del laboratorio ---
+Django==6.1.1
+Pillow==12.3.0
+
+# --- API REST consumida por el frontend React ---
+djangorestframework==3.18.1
+django-cors-headers==4.9.0
