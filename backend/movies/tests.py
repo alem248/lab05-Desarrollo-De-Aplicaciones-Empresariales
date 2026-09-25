@@ -230,9 +230,16 @@ class Paso6ValoracionesInlineTests(MovieFactoryMixin, AdminTestCase):
             reverse("admin:movies_movie_change", args=[self.pelicula.pk])
         )
         self.assertEqual(respuesta.status_code, 200)
-        self.assertTexto(respuesta, "valoraciones")
-        # La gestion de inline de Django usa este input oculto.
-        self.assertTexto(respuesta, 'name="ratings-TOTAL_FORMS"')
+        # Django capitaliza el heading a partir de verbose_name_plural.
+        self.assertTexto(respuesta, "Valoraciones")
+        self.assertTexto(respuesta, 'id="ratings-heading"')
+        # La gestion de inline de Django usa estos inputs ocultos.
+        for campo in ["TOTAL_FORMS", "INITIAL_FORMS", "MIN_NUM_FORMS", "MAX_NUM_FORMS"]:
+            with self.subTest(campo=campo):
+                self.assertTexto(respuesta, f'name="ratings-{campo}"')
+        # Y las columnas del inline declaradas en fields.
+        self.assertTexto(respuesta, "comment")
+        self.assertTexto(respuesta, "author")
 
     def test_el_formulario_de_anadir_tambien_muestra_el_inline(self):
         respuesta = self.client.get(reverse("admin:movies_movie_add"))

@@ -1,21 +1,39 @@
 """
-Personalizacion del panel de administracion - paso 5.
+Personalizacion del panel de administracion - pasos 5, 6 y 7.
 
 El paso 4 registro los modelos con `admin.site.register(Model)`. Aqui se
 sustituye cada registro por una clase ModelAdmin que declara:
 
     list_display  -> que columnas se ven en el listado
     list_filter   -> que filtros aparecen en la barra lateral
-    search_fields -> sobre que campos funciona la buscador
+    search_fields -> sobre que campos funciona el buscador
 
-Los pasos 6 y 7 (inline de valoraciones y campos de solo lectura) se anaden
-en los commits posteriores, siguiendo el orden del enunciado.
+Ademas:
+
+    RatingInline    -> paso 6, las valoraciones se dan de alta dentro de la pelicula
+    readonly_fields -> paso 7, la auditoria se muestra pero no se puede editar
 """
 
 from django.contrib import admin
-from django.db.models import Count
 
 from .models import Genre, Movie, Person, Rating
+
+
+class RatingInline(admin.TabularInline):
+    """
+    Paso 6: bloque de lineas de valoraciones dentro del formulario de la pelicula.
+
+    Asi se dan de alta sin salir del registro padre, en lugar de tener que ir
+    a "Valoraciones", pulsar "Anadir" y buscar la pelicula a mano.
+    """
+
+    model = Rating
+    # Cada linea muestra solo la nota, el comentario y quien valora.
+    # created_at / updated_at se anaden como solo lectura en el paso 7.
+    fields = ("score", "comment", "author")
+    extra = 1  # Una linea en blanco para anadir una valoracion nueva.
+    verbose_name = "valoracion"
+    verbose_name_plural = "valoraciones"
 
 
 @admin.register(Movie)
@@ -34,6 +52,9 @@ class MovieAdmin(admin.ModelAdmin):
 
     # Orden estable del listado.
     ordering = ("-year", "title")
+
+    # Paso 6: las valoraciones se editan dentro de la pelicula.
+    inlines = [RatingInline]
 
     @admin.display(description="generos", ordering="genres__name")
     def genres_list(self, obj: Movie) -> str:
