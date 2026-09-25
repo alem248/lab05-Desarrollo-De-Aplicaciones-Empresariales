@@ -593,10 +593,27 @@ class Paso10VistaRecomendacionTests(MovieFactoryMixin, AdminTestCase):
         self.assertEqual(titulos, ["La mejor", "La intermedia", "La peor"])
 
     def test_sin_genero_devuelve_todas_ordenadas_por_media(self):
+        # Sin filtro de genero entran todas. "Otra" tiene un unico 10, asi que
+        # su media es 10.0 y va por delante de "La mejor", cuya media es 9.0.
         respuesta = self.client.get(reverse("movie-recommendations"))
         titulos = [p["title"] for p in respuesta.json()["results"]]
-        self.assertEqual(titulos[0], "La mejor")
-        self.assertIn("Otra", titulos)
+        self.assertEqual(titulos, ["Otra", "La mejor", "La intermedia", "La peor"])
+
+    def test_el_id_de_genero_invalido_da_error_400(self):
+        respuesta = self.client.get(reverse("movie-recommendations"), {"genre": "no-es-un-id"})
+        self.assertEqual(respuesta.status_code, 400)
+
+    def test_los_detalles_de_una_pelicula_traen_generos_reparto_y_valoraciones(self):
+        respuesta = self.client.get(
+            reverse("movie-detail", args=[self.mejor.pk])
+        )
+        self.assertEqual(respuesta.status_code, 200)
+        datos = respuesta.json()
+        self.assertEqual(datos["title"], "La mejor")
+        self.assertEqual(datos["average_score"], 9.0)
+        self.assertEqual(datos["ratings_count"], 2)
+        self.assertEqual([g["name"] for g in datos["genres"]], ["Ciencia ficcion"])
+        self.assertEqual(len(datos["ratings"]), 2)
 
     def test_excluye_peliculas_sin_valoracion(self):
         Movie.objects.create(title="Sin valorar", year=2022).genres.set([self.ficcion])

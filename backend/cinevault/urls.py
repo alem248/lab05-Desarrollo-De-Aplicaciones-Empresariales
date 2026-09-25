@@ -17,10 +17,12 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # API REST de solo lectura que consume el frontend React (paso 10).
+    path('api/', include('movies.urls')),
 ]
 
 # Solo en desarrollo: sirve /media/ para que las portadas se vean en el panel.
