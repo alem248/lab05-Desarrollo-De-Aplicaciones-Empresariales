@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Portal de Noticias{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'news/css/style.css' %}">
+</head>
+<body>
+    <header class="site-header">
+        <h1><a href="{% url 'news:home' %}">Portal de Noticias</a></h1>
+        <nav>
+            <a href="{% url 'news:home' %}">Portada</a>
+        </nav>
+    </header>
+
+    <main class="layout">
+        <section class="content">
+            {% block content %}{% endblock %}
+        </section>
+
+        <aside class="sidebar">
+            {% block sidebar %}
+            <h2>Categorias</h2>
+            <ul>
+                {% for cat in sidebar_categories %}
+                <li><a href="{% url 'news:category' cat.slug %}">{{ cat.name }}</a></li>
+                {% endfor %}
+            </ul>
+            {% endblock %}
+        </aside>
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2026 Laboratorio 05 - Aplicaciones Empresariales</p>
+    </footer>
+</body>
+</html>
