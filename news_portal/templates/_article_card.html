@@ -1,0 +1,14 @@
+{# Fragmento con la tarjeta de una noticia. Lo incluyen la portada y el listado por categoria. #}
+<article class="article-card">
+    {% if article.image %}
+    <img src="{{ article.image.url }}" alt="{{ article.title }}">
+    {% endif %}
+    <h2><a href="{% url 'news:detail' article.slug %}">{{ article.title }}</a></h2>
+    <p class="meta">
+        Por {{ article.author.name }} · {{ article.published_at|date:"d/m/Y" }}
+        {% for cat in article.categories.all %}
+        · <a href="{% url 'news:category' cat.slug %}">{{ cat.name }}</a>
+        {% endfor %}
+    </p>
+    <p>{{ article.summary|truncatechars:160 }}</p>
+</article>
