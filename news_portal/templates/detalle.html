@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ article.title }} - Portal de Noticias{% endblock %}
+
+{% block content %}
+<article class="article-detail">
+    <h2>{{ article.title }}</h2>
+    <p class="meta">
+        Por <strong>{{ article.author.name }}</strong>
+        · {{ article.published_at|date:"d/m/Y H:i" }}
+    </p>
+
+    {% for cat in article.categories.all %}
+    <a class="tag" href="{% url 'news:category' cat.slug %}">{{ cat.name }}</a>
+    {% endfor %}
+
+    {% if article.image %}
+    <img class="article-image" src="{{ article.image.url }}" alt="{{ article.title }}">
+    {% endif %}
+
+    <p>{{ article.summary }}</p>
+
+    {# OJO: el cuerpo salio escapado por Django; ver paso 12 del informe. #}
+    <div class="body">{{ article.body|linebreaks }}</div>
+
+    <p><a href="{% url 'news:home' %}">&larr; Volver a la portada</a></p>
+</article>
+{% endblock %}
