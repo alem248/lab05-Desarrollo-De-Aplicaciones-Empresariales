@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Portada - Portal de Noticias{% endblock %}
+
+{% block content %}
+<h2>Ultimas noticias</h2>
+
+{% for article in articles %}
+    {% include '_article_card.html' with article=article %}
+{% empty %}
+<p>No hay noticias publicadas todavia.</p>
+{% endfor %}
+{% endblock %}
