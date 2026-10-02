@@ -36,3 +36,6 @@ service-account*.json
 .DS_Store
 Thumbs.db
 desktop.ini
+
+/news_portal/media/
+
