@@ -39,3 +39,5 @@ desktop.ini
 
 /news_portal/media/
 
+*.err
+
