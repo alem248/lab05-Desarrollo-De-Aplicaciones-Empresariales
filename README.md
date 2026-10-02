@@ -1,5 +1,8 @@
 # CineVault — Laboratorio 06
 
+> **Nota:** este directorio también contiene el laboratorio 05 (Portal de
+> Noticias) en [`news_portal/`](news_portal/README.md).
+
 Panel de administración de Django personalizado y vista pública de
 recomendaciones en React.
 
